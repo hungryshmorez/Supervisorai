@@ -287,6 +287,14 @@ This project has a rich roadmap for future development.
 
 ## 7. Credits
 
-This project was developed as part of the Minimax Agent Hackathon.
+This project was developed for the **MiniMax Week Hackathon — Track 1: Reasoning**.
 
-**Lead AI Software Engineer:** Jules
+| | |
+|---|---|
+| **Project owner & creator** | [**hungryshmorez**](https://github.com/hungryshmorez) |
+| **Lead AI Software Engineer** | **Jules** |
+| **Engineering & the Demo / Codex sites** | [**Claude Code**](https://claude.com/claude-code) (Anthropic) |
+| **Reasoning model** | [**MiniMax-M3**](https://www.minimax.io/) — powers the Plan → Delegate → Audit → Correct → Synthesis loop |
+| **Serving infrastructure** | [**GMI Cloud**](https://www.gmicloud.ai/) — serves MiniMax-M3 |
+
+With thanks to **MiniMax** and **GMI Cloud** for the model and the serving stack that make the supervisory loop run.
