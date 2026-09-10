@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupervisorAI — Live Demo</title>
+  <meta name="description" content="Watch SupervisorAI run its Plan → Delegate → Audit → Correct → Verified Synthesis loop on a real bug report, powered by MiniMax-M3." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="assets/app.css" />
+  <style>
+    /* Demo-specific */
+    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 26px 0; }
+    @media (max-width: 720px) { .pipeline { grid-template-columns: 1fr 1fr; } }
+    .stage {
+      border: 1px solid var(--line); border-radius: 12px; padding: 14px 12px; background: var(--panel);
+      text-align: center; transition: all .3s ease; position: relative;
+    }
+    .stage .n { font-size: 11px; font-weight: 700; color: var(--ink-faint); letter-spacing: .08em; }
+    .stage .t { font-weight: 700; margin-top: 4px; font-size: 15px; }
+    .stage .d { font-size: 12px; color: var(--ink-faint); margin-top: 3px; }
+    .stage.active { border-color: var(--brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent); background: color-mix(in srgb, var(--brand) 7%, var(--panel)); }
+    .stage.done { border-color: color-mix(in srgb, var(--ok) 55%, transparent); }
+    .stage.done .n::after { content: " ✓"; color: var(--ok); }
+
+    .console-wrap { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 900px) { .console-wrap { grid-template-columns: 1fr; } }
+    #console {
+      background: var(--code-bg); border: 1px solid #20263c; border-radius: 12px;
+      padding: 16px 18px; height: 440px; overflow-y: auto; font-family: var(--mono);
+      font-size: 12.5px; line-height: 1.7; color: var(--code-ink);
+    }
+    #console .ln { white-space: pre-wrap; word-break: break-word; }
+    .t-tag { font-weight: 700; }
+    .c-plan { color: #a5b4fc; } .c-dispatch { color: #7dd3fc; } .c-audit { color: #c4b5fd; }
+    .c-pass { color: #6ee7b7; } .c-fail { color: #fca5a5; } .c-drift { color: #fcd34d; }
+    .c-recover { color: #fdba74; } .c-synth { color: #f0abfc; } .c-info { color: #94a3b8; }
+    .c-goal { color: #e2e8f0; }
+    .cursor::after { content: "▋"; color: var(--accent); animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .ledger { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ledger th, .ledger td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    .ledger th { color: var(--ink-faint); font-weight: 600; font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; }
+    .ledger .verdict { color: var(--ok); font-weight: 700; }
+    .deliverable { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); padding: 5px 0; }
+    .deliverable::before { content: "📄 "; }
+    .metric { text-align: center; padding: 16px; }
+    .metric .v { font-size: 1.9rem; font-weight: 800; color: var(--brand); }
+    .metric .k { font-size: 12px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+
+    .repo-box { font-family: var(--mono); font-size: 12.5px; background: var(--code-bg); color: var(--code-ink); border-radius: 10px; padding: 14px 16px; border: 1px solid #20263c; overflow-x: auto; }
+    .repo-box .cmt { color: #64748b; }
+    .repo-box .kw { color: #c4b5fd; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wrap row">
+      <a class="brand" href="./"><span class="logo">S</span> SupervisorAI</a>
+      <nav class="navlinks">
+        <a href="#demo" class="active">Demo</a>
+        <a href="#how">How it works</a>
+        <a href="codex/">Codex ↗</a>
+        <a href="https://github.com/hungryshmorez/Supervisorai" target="_blank" rel="noopener">GitHub</a>
+        <button class="theme-btn" onclick="__toggleTheme()" aria-label="Toggle theme">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="wrap hero">
+      <span class="eyebrow">🏆 MiniMax Week · Track 1 — Reasoning</span>
+      <h1>An agent that holds the plan, delegates the work,<br /><span class="gradient">and fact-checks itself.</span></h1>
+      <p class="lede">
+        Autonomous agents fail by <em>losing the plot</em> — drifting off task, citing sources that say the opposite,
+        reporting "done" while a step silently failed. <strong>SupervisorAI</strong> is the supervisor that catches it,
+        running a closed loop powered by <strong>MiniMax-M3 on GMI Cloud</strong>.
+      </p>
+      <div class="btn-row">
+        <a href="#demo" class="btn btn-primary">▶ Watch the live demo</a>
+        <a href="codex/" class="btn btn-ghost">📖 Open the Codex</a>
+      </div>
+    </section>
+
+    <!-- Demo -->
+    <section id="demo" class="wrap section">
+      <h2>Live supervisory loop</h2>
+      <p class="sub">A real scenario: an incoming bug report on a mock repo. Press run and watch the supervisor plan, delegate, audit, self-correct, and verify — the exact trace produced by <code>demo.py</code>.</p>
+
+      <div class="repo-box" aria-label="mock repository file">
+<span class="cmt"># billing/discount.py — issue #482</span>
+<span class="kw">def</span> apply_discount(price, percent):
+    <span class="cmt"># BUG: percent &gt; 100 yields a negative price;</span>
+    <span class="cmt"># a None percent raises a TypeError at runtime.</span>
+    <span class="kw">return</span> price - (price * percent / 100)
+      </div>
+
+      <div class="pipeline" id="pipeline">
+        <div class="stage" data-stage="0"><div class="n">STEP 1</div><div class="t">Plan</div><div class="d">goal → task DAG</div></div>
+        <div class="stage" data-stage="1"><div class="n">STEP 2</div><div class="t">Delegate</div><div class="d">to M3 workers</div></div>
+        <div class="stage" data-stage="2"><div class="n">STEP 3</div><div class="t">Audit</div><div class="d">verify vs. plan</div></div>
+        <div class="stage" data-stage="3"><div class="n">STEP 4</div><div class="t">Correct</div><div class="d">re-prompt on drift</div></div>
+        <div class="stage" data-stage="4"><div class="n">STEP 5</div><div class="t">Synthesis</div><div class="d">verified result</div></div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:18px">
+        <button id="runBtn" class="btn btn-primary">▶ Run the supervisor</button>
+        <button id="resetBtn" class="btn btn-ghost" hidden>↻ Reset</button>
+        <span class="tag" id="statusTag" style="align-self:center">idle</span>
+      </div>
+
+      <div class="console-wrap">
+        <div id="console" aria-live="polite"><div class="ln c-info">$ python demo.py   <span class="c-info"># press “Run the supervisor” to begin</span></div></div>
+        <div>
+          <div class="card" style="padding:18px; margin-bottom:18px">
+            <div class="grid grid-3" style="gap:6px">
+              <div class="metric"><div class="v" id="mTasks">0</div><div class="k">Tasks</div></div>
+              <div class="metric"><div class="v" id="mAudits">0</div><div class="k">Audits</div></div>
+              <div class="metric"><div class="v" id="mFixes">0</div><div class="k">Self-heals</div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:18px" id="verdictCard" hidden>
+            <div class="tag ok" style="margin-bottom:10px">✓ GOAL COMPLETED</div>
+            <p style="margin:0 0 6px; font-weight:700">Verified PR summary produced.</p>
+            <p class="muted" style="margin:0; font-size:13px">Every dependency passed audit. The discount function now clamps percent to 0–100 and treats a missing percent as 0, with regression tests covering percent&gt;100, percent=None, and the normal case.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit ledger -->
+      <div class="card" style="margin-top:22px" id="ledgerCard" hidden>
+        <h3 style="margin:0 0 14px">Audit ledger</h3>
+        <table class="ledger">
+          <thead><tr><th>Status</th><th>Task</th><th>Verdict</th><th>Confidence</th></tr></thead>
+          <tbody id="ledgerBody"></tbody>
+        </table>
+        <h3 style="margin:20px 0 10px">Deliverables written to disk</h3>
+        <div id="deliverables"></div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="wrap section">
+      <h2>How it works</h2>
+      <p class="sub">Five stages, one closed loop. The supervisor never declares success until every dependency verifies.</p>
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="tag brand" style="margin-bottom:10px">STEP 1 · PLAN</div>
+          <p style="margin:0">MiniMax-M3 decomposes the goal into a validated task <strong>DAG</strong> with explicit dependencies, and assigns each task the best specialist from the roster.</p>
+        </div>
+        <div class="card">
+          <div class="tag brand" style="margin-bottom:10px">STEP 2 · DELEGATE</div>
+          <p style="margin:0">Each ready task is dispatched to an M3-backed worker running with its persona as a system prompt — <code>coder.python</code>, <code>reviewer.code</code>, and more.</p>
+        </div>
+        <div class="card">
+          <div class="tag brand" style="margin-bottom:10px">STEP 3 · AUDIT</div>
+          <p style="margin:0">The supervisor verifies each output against the plan: an M3 audit verdict, a heuristic quality analyzer, an LLM second-opinion judge, and a drift check.</p>
+        </div>
+        <div class="card">
+          <div class="tag brand" style="margin-bottom:10px">STEP 4 · CORRECT</div>
+          <p style="margin:0">Failed or drifted outputs are re-prompted with a concrete correction hint and re-audited — the loop self-heals instead of shipping a broken step.</p>
+        </div>
+        <div class="card">
+          <div class="tag brand" style="margin-bottom:10px">STEP 5 · SYNTHESIS</div>
+          <p style="margin:0">Only when <em>every</em> dependency passes does the system synthesize a final, verified result — here, a PR summary suitable for human review.</p>
+        </div>
+        <div class="card" style="background:linear-gradient(135deg, color-mix(in srgb, var(--brand) 12%, var(--panel)), var(--panel))">
+          <div class="tag" style="margin-bottom:10px">🛡️ HITL GATE</div>
+          <p style="margin:0">Tasks marked <code>high_stakes</code> <strong>halt</strong> for explicit human approval before a shippable artifact is written. Never auto-approved.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Codex callout -->
+    <section class="wrap section">
+      <div class="card" style="background:linear-gradient(135deg, color-mix(in srgb, var(--brand-2) 14%, var(--panel)), var(--panel)); text-align:center; padding:40px">
+        <div class="ic" style="font-size:34px">📖</div>
+        <h2 style="margin:8px 0 6px">The SupervisorAI Codex</h2>
+        <p class="sub" style="margin:0 auto 20px; max-width:60ch">An encyclopedia of the whole platform — the reasoning engine, the studio capabilities, the VORTEX-OS skills, the 30+ agent roster, the browser extension, and the architecture behind it all.</p>
+        <a href="codex/" class="btn btn-primary">Explore the Codex →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap" style="display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div>SupervisorAI · Powered by MiniMax-M3 on GMI Cloud · MiniMax Week Hackathon (Track 1)</div>
+      <div style="display:flex; gap:18px; flex-wrap:wrap">
+        <a href="codex/"><strong>📖 Codex</strong></a>
+        <a href="https://github.com/hungryshmorez/Supervisorai" target="_blank" rel="noopener">GitHub</a>
+        <a href="#demo">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/theme.js"></script>
+  <script>
+    // Real trace, distilled from demo.py output.
+    var TRACE = [
+      { s:0, cls:"c-info",     tag:"[INFO]",       msg:"Model backend: MiniMax-M3 · endpoint https://api.gmi-serving.com/v1/messages" },
+      { s:0, cls:"c-info",     tag:"[INFO]",       msg:"Specialist roster (8): analyst.strategic, coder.javascript, coder.python, coder.typescript, researcher.web, reviewer.code, writer.docs, writer.narrative" },
+      { s:0, cls:"c-goal",     tag:"[GOAL]",       msg:"Fix issue #482: apply_discount returns a negative price when percent > 100 and crashes when percent is None." },
+      { s:0, cls:"c-plan",     tag:"[SUPERVISOR-M3]", msg:"Decomposing goal into a validated task DAG…" },
+      { s:0, cls:"c-plan",     tag:"[PLAN]",       msg:"Plan holds 4 tasks: Analyze the issue → Implement the fix → Write regression tests → Summarize the pull request", stage:"plan" },
+
+      { s:1, cls:"c-dispatch", tag:"[DISPATCH]",   msg:"researcher.web → 'Analyze the issue'  [attempt 1/3]" },
+      { s:2, cls:"c-audit",    tag:"[AUDIT]",      msg:"MiniMax-M3 verifying 'Analyze the issue' against the plan…" },
+      { s:2, cls:"c-pass",     tag:"[PASS]",       msg:"'Analyze the issue' verified (confidence 0.82).", task:{name:"Analyze the issue", file:"analyze_issue.md"} },
+
+      { s:1, cls:"c-dispatch", tag:"[DISPATCH]",   msg:"coder.javascript → 'Implement the fix'  [attempt 1/3] (returns an empty stub)" },
+      { s:2, cls:"c-audit",    tag:"[AUDIT]",      msg:"verdict=fail  issues=['output is empty or too short to satisfy the task']" },
+      { s:3, cls:"c-drift",    tag:"[DRIFT DETECTED]", msg:"Empty/insufficient output — plan not satisfied.", drift:true },
+      { s:3, cls:"c-recover",  tag:"[RECOVERY]",   msg:"Re-prompting worker: “Produce a concrete, complete deliverable for the task.”" },
+      { s:1, cls:"c-dispatch", tag:"[DISPATCH]",   msg:"coder.javascript → 'Implement the fix'  [attempt 2/3] (returns a real patch)" },
+      { s:2, cls:"c-pass",     tag:"[PASS]",       msg:"Correction verified (confidence 0.82).", task:{name:"Implement the fix", file:"implement_fix.md"} },
+
+      { s:1, cls:"c-dispatch", tag:"[DISPATCH]",   msg:"coder.python → 'Write regression tests'  [attempt 1/3]" },
+      { s:2, cls:"c-audit",    tag:"[AUDIT]",      msg:"MiniMax-M3 verifying 'Write regression tests' against the plan…" },
+      { s:2, cls:"c-pass",     tag:"[PASS]",       msg:"'Write regression tests' verified (confidence 0.82).", task:{name:"Write regression tests", file:"write_tests.md"} },
+
+      { s:1, cls:"c-dispatch", tag:"[DISPATCH]",   msg:"researcher.web → 'Summarize the pull request'  [attempt 1/3]" },
+      { s:2, cls:"c-audit",    tag:"[AUDIT]",      msg:"MiniMax-M3 verifying 'Summarize the pull request' against the plan…" },
+      { s:2, cls:"c-pass",     tag:"[PASS]",       msg:"'Summarize the pull request' verified (confidence 0.82).", task:{name:"Summarize the pull request", file:"summarize_pr.md"} },
+
+      { s:4, cls:"c-synth",    tag:"[SUPERVISOR-M3]", msg:"All tasks passed audit. Synthesizing verified final result…" },
+      { s:4, cls:"c-synth",    tag:"[SYNTHESIS]",  msg:"The discount function now clamps percent to 0–100 and treats a missing percent as 0, with regression tests covering percent>100, percent=None, and the normal case." },
+      { s:4, cls:"c-pass",     tag:"[PASS]",       msg:"Goal COMPLETED — all dependencies verified.", done:true }
+    ];
+
+    var consoleEl = document.getElementById("console");
+    var stages = Array.prototype.slice.call(document.querySelectorAll(".stage"));
+    var runBtn = document.getElementById("runBtn");
+    var resetBtn = document.getElementById("resetBtn");
+    var statusTag = document.getElementById("statusTag");
+    var ledgerBody = document.getElementById("ledgerBody");
+    var deliverablesEl = document.getElementById("deliverables");
+    var running = false, timer = null;
+    var counts = { tasks:0, audits:0, fixes:0 };
+
+    function setMetric(id, v){ document.getElementById(id).textContent = v; }
+    function activate(stageIdx){
+      stages.forEach(function(st){
+        var i = +st.getAttribute("data-stage");
+        st.classList.toggle("active", i === stageIdx);
+        if (i < stageIdx || (stageIdx === 4 && i <= 4)) st.classList.add("done");
+      });
+    }
+    function line(item){
+      var div = document.createElement("div");
+      div.className = "ln";
+      div.innerHTML = '<span class="t-tag ' + item.cls + '">' + item.tag + '</span> ' +
+                      '<span class="' + (item.cls==="c-goal"?"c-goal":"") + '">' + item.msg + '</span>';
+      consoleEl.appendChild(div);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+    function ledgerRow(task){
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td><span class='tag ok'>COMPLETED</span></td><td>" + task.name +
+                     "</td><td class='verdict'>pass</td><td>0.82</td>";
+      ledgerBody.appendChild(tr);
+      var d = document.createElement("div");
+      d.className = "deliverable";
+      d.textContent = "deliverables/" + task.file;
+      deliverablesEl.appendChild(d);
+    }
+
+    function reset(){
+      clearTimeout(timer); running = false;
+      consoleEl.innerHTML = '<div class="ln c-info">$ python demo.py   <span class="c-info"># press “Run the supervisor” to begin</span></div>';
+      ledgerBody.innerHTML = ""; deliverablesEl.innerHTML = "";
+      counts = { tasks:0, audits:0, fixes:0 };
+      setMetric("mTasks",0); setMetric("mAudits",0); setMetric("mFixes",0);
+      stages.forEach(function(s){ s.classList.remove("active","done"); });
+      document.getElementById("ledgerCard").hidden = true;
+      document.getElementById("verdictCard").hidden = true;
+      resetBtn.hidden = true; runBtn.hidden = false; runBtn.disabled = false;
+      statusTag.textContent = "idle"; statusTag.className = "tag";
+    }
+
+    function run(){
+      if (running) return;
+      running = true; runBtn.disabled = true; runBtn.hidden = true; resetBtn.hidden = false;
+      consoleEl.innerHTML = '<div class="ln c-info">$ python demo.py</div>';
+      statusTag.textContent = "running…"; statusTag.className = "tag brand";
+      var i = 0;
+      (function step(){
+        if (i >= TRACE.length){
+          running = false;
+          statusTag.textContent = "verified ✓"; statusTag.className = "tag ok";
+          document.getElementById("verdictCard").hidden = false;
+          return;
+        }
+        var item = TRACE[i];
+        activate(item.s);
+        line(item);
+        if (item.cls === "c-audit") setMetric("mAudits", ++counts.audits);
+        if (item.drift) setMetric("mFixes", ++counts.fixes);
+        if (item.task){ setMetric("mTasks", ++counts.tasks); ledgerRow(item.task); document.getElementById("ledgerCard").hidden = false; }
+        i++;
+        var delay = item.done ? 500 : (item.cls === "c-audit" ? 650 : 480);
+        timer = setTimeout(step, delay);
+      })();
+    }
+
+    runBtn.addEventListener("click", run);
+    resetBtn.addEventListener("click", reset);
+  </script>
+</body>
+</html>
