@@ -292,7 +292,7 @@ This project was developed for the **MiniMax Week Hackathon — Track 1: Reasoni
 | | |
 |---|---|
 | **Project owner & creator** | [**hungryshmorez**](https://github.com/hungryshmorez) |
-| **Lead AI Software Engineer** | **Jules** |
+| **Contributor** | **Jules** |
 | **Engineering & the Demo / Codex sites** | [**Claude Code**](https://claude.com/claude-code) (Anthropic) |
 | **Reasoning model** | [**MiniMax-M3**](https://www.minimax.io/) — powers the Plan → Delegate → Audit → Correct → Synthesis loop |
 | **Serving infrastructure** | [**GMI Cloud**](https://www.gmicloud.ai/) — serves MiniMax-M3 |
