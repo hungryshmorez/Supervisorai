@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupervisorAI Codex</title>
+  <meta name="description" content="The SupervisorAI Codex — an encyclopedia of the reasoning engine, studio capabilities, VORTEX-OS skills, the agent roster, modules, and architecture." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .layout { display: grid; grid-template-columns: 240px 1fr; gap: 34px; align-items: start; padding-top: 30px; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .toc { position: static !important; max-height: none !important; } }
+    .toc { position: sticky; top: 76px; max-height: calc(100vh - 96px); overflow-y: auto; border-right: 1px solid var(--line); padding-right: 14px; }
+    .toc h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-faint); margin: 18px 0 8px; }
+    .toc a { display: block; color: var(--ink-soft); padding: 5px 10px; border-radius: 8px; font-size: 13.5px; }
+    .toc a:hover { background: var(--bg-elev); color: var(--ink); text-decoration: none; }
+    .toc a.active { color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, transparent); font-weight: 600; }
+
+    .doc section { scroll-margin-top: 76px; margin-bottom: 46px; }
+    .doc h2 { font-size: 1.6rem; letter-spacing: -.01em; margin: 0 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+    .doc h3 { font-size: 1.15rem; margin: 26px 0 8px; }
+    .doc p, .doc li { color: var(--ink-soft); }
+    .doc code { background: var(--bg-elev); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: .88em; color: var(--ink); }
+    .doc pre { background: var(--code-bg); color: var(--code-ink); border: 1px solid #20263c; border-radius: 10px; padding: 16px 18px; overflow-x: auto; font-size: 12.5px; line-height: 1.65; }
+    .doc pre code { background: none; border: none; padding: 0; color: inherit; }
+    .kv { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .kv td, .kv th { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .kv th { color: var(--ink-faint); font-weight: 600; width: 160px; }
+    .kv td code { white-space: nowrap; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+    .chip { font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 7px; background: var(--bg-elev); border: 1px solid var(--line); color: var(--ink-soft); }
+    .callout { border-left: 3px solid var(--brand); background: color-mix(in srgb, var(--brand) 7%, var(--panel)); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .callout.warn { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 9%, var(--panel)); }
+    .roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .agent { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--panel); }
+    .agent .id { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--ink); }
+    .agent .role { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+    .searchbox { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--bg-elev); color: var(--ink); font-size: 14px; margin-bottom: 4px; }
+    .searchbox:focus { outline: none; border-color: var(--brand); }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wrap row">
+      <a class="brand" href="../"><span class="logo">S</span> SupervisorAI</a>
+      <nav class="navlinks">
+        <a href="../">Demo</a>
+        <a href="./" class="active">Codex</a>
+        <a href="https://github.com/hungryshmorez/Supervisorai" target="_blank" rel="noopener">GitHub</a>
+        <button class="theme-btn" onclick="__toggleTheme()" aria-label="Toggle theme">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="hero" style="padding:48px 0 8px">
+      <span class="eyebrow">📖 The Codex</span>
+      <h1 style="font-size:clamp(1.8rem,4vw,2.6rem)">Everything about SupervisorAI, in one place</h1>
+      <p class="lede" style="margin-bottom:0">The reasoning engine, the autonomous studio, the VORTEX-OS skills, the full agent roster, the modules, and the architecture — an encyclopedia of the platform.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="layout">
+      <!-- TOC -->
+      <aside class="toc" id="toc">
+        <h4>Contents</h4>
+        <a href="#overview">Overview</a>
+        <a href="#loop">The reasoning loop</a>
+        <a href="#studio">Studio capabilities</a>
+        <a href="#vortex">VORTEX-OS skills</a>
+        <a href="#roster">Agent roster</a>
+        <a href="#modules">Core modules</a>
+        <a href="#extension">Browser extension</a>
+        <a href="#integration">MiniMax-M3 / GMI</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#glossary">Glossary</a>
+      </aside>
+
+      <!-- Content -->
+      <main class="doc">
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>Autonomous agents fail in a specific, expensive way: they <em>lose the plot</em>. A coding agent starts fixing a bug and quietly drifts into rewriting unrelated files; a research assistant confidently cites a source that says the opposite of what it claims; a multi-step task reports “done” while a dependency silently failed. The missing piece is not a bigger worker model — it is a <strong>supervisor</strong> that holds the plan, checks every step against it, and refuses to declare success until the work actually verifies.</p>
+          <p><strong>SupervisorAI</strong> is that supervisor. It uses <strong>MiniMax-M3</strong>’s reasoning to run a closed loop over a team of workers, and it grew into a full autonomous studio with a specialist roster, a continuity engine, on-disk deliverables, and a human-in-the-loop safety gate. Two command-line “skills” (VORTEX-OS and VORTEX-OS-v3) and a browser extension round out the platform.</p>
+          <div class="chips">
+            <span class="chip">Plan → Delegate → Audit → Correct → Synthesis</span>
+            <span class="chip">MiniMax-M3 on GMI Cloud</span>
+            <span class="chip">MCP server</span>
+            <span class="chip">HITL safety gate</span>
+          </div>
+          <p><a href="../" class="btn btn-ghost" style="margin-top:8px">▶ See the loop run in the live Demo</a></p>
+        </section>
+
+        <section id="loop">
+          <h2>The reasoning loop</h2>
+          <p>M3 decomposes a goal into a validated task DAG, delegates each task to an M3-backed worker, then puts on its supervisor hat and audits every output against the plan — catching hallucinations, errors, and drift. Failed or drifted outputs are re-prompted with a concrete correction hint. Only when <em>every</em> dependency passes verification does the system synthesize a final, verified result.</p>
+          <pre>                ┌─────────────────────────────────────────────┐
+                │          SUPERVISOR  (MiniMax-M3)           │
+                │   holds the plan · audits · self-corrects   │
+                └───────────────┬─────────────────────────────┘
+   1. PLAN                      │   4. CORRECT (re-prompt on fail/drift)
+   decompose goal → DAG         │        ▲
+                ┌───────────────▼────────┴──────────┐
+                │        Orchestrator (DAG)          │
+                │  get_ready_tasks() · dependencies  │
+                └───────┬─────────────────┬──────────┘
+       2. DELEGATE      │                 │   3. AUDIT
+                        ▼                 ▼
+                ┌───────────────┐   ┌──────────────────────────┐
+                │  M3 Workers   │──▶│  Supervisor verification │
+                │  (per task)   │   │  • M3 audit verdict      │
+                │  via MCP      │   │  • QualityAnalyzer (heur)│
+                └───────────────┘   │  • LLM judge (2nd opinion)│
+                                    │  • Coherence / drift check│
+                                    └─────────────┬────────────┘
+                                                  │ all pass?
+                                                  ▼
+                                      5. VERIFIED SYNTHESIS</pre>
+          <div class="callout">The single integration point is <code>src/llm/client.py</code> (<code>LLMClient</code>). Every LLM-using component depends on it, so retargeting this one class flips the whole platform onto MiniMax-M3.</div>
+          <h3>The five stages</h3>
+          <table class="kv">
+            <tr><th>1 · Plan</th><td>M3 decomposes the goal into a validated task DAG with dependencies and assigns each task a specialist persona.</td></tr>
+            <tr><th>2 · Delegate</th><td>Each ready task (from <code>get_ready_tasks()</code>) is dispatched to an M3-backed worker running with its persona as a system prompt.</td></tr>
+            <tr><th>3 · Audit</th><td>Every output is verified against the plan via an M3 audit verdict, a heuristic <code>QualityAnalyzer</code>, an <code>LLMJudge</code> second opinion, and a coherence/drift check.</td></tr>
+            <tr><th>4 · Correct</th><td>Failed or drifted outputs are re-prompted with a concrete correction hint and re-audited — the loop self-heals.</td></tr>
+            <tr><th>5 · Synthesis</th><td>Only when every dependency passes does the system produce a final, verified result.</td></tr>
+          </table>
+        </section>
+
+        <section id="studio">
+          <h2>Studio capabilities</h2>
+          <p>On top of the reasoning loop, SupervisorAI runs as an autonomous studio.</p>
+          <h3>🎭 Specialist agent roster</h3>
+          <p>Named worker personas live in <code>agents/*.json</code>. M3 assigns the best specialist to each task during planning, and each worker runs with its persona as its system prompt.</p>
+          <h3>🧵 Continuity engine</h3>
+          <p>Pass <code>continuity_rules</code> (era, character, tone, safety canon) to <code>run_goal</code>; they are injected into every worker prompt, folded into each audit’s checks, and guarded by a fast deterministic pre-check. Violations trigger a self-healing correction.</p>
+          <h3>📄 On-disk deliverables</h3>
+          <p>Every <em>verified</em> worker output is written to <code>deliverables/&lt;file&gt;</code> with markdown-fence stripping, so <code>.html</code>/<code>.py</code>/<code>.json</code> are valid standalone files. A run produces real artifacts, not just text.</p>
+          <h3>🛡️ Human-in-the-Loop (Deep-Sleep) gate</h3>
+          <p>Tasks the planner marks <code>high_stakes</code> (finalizing/packaging a shippable artifact) <strong>halt</strong> before they are written and require explicit human approval via the <code>hitl_status</code> / <code>hitl_approve</code> / <code>hitl_deny</code> MCP tools.</p>
+          <div class="callout warn"><strong>Never auto-approved.</strong> The HITL gate is the last line of defense before a shippable artifact leaves the system.</div>
+        </section>
+
+        <section id="vortex">
+          <h2>The VORTEX-OS studio skills</h2>
+          <p>The Python engine grew out of <strong>VORTEX-OS</strong>, a bash “skill” that runs the same 4-tier orchestration from the command line. Both flavors ship in the repo, and both call MiniMax-M3 on GMI Cloud for real (via <code>lib/minimax.sh</code>).</p>
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="tag brand" style="margin-bottom:8px">vortex-os/</div>
+              <p style="margin:0 0 8px"><strong>The creative studio flavor.</strong> A 4-tier chain of command, HITL Deep-Sleep gate, continuity engine, self-healing, and real on-disk deliverables.</p>
+              <pre style="margin:0"><code>./skill.sh --dispatch-master objective.md</code></pre>
+            </div>
+            <div class="card">
+              <div class="tag brand" style="margin-bottom:8px">vortex-os-v3/</div>
+              <p style="margin:0 0 8px"><strong>The software-engineering flavor.</strong> A 30+ agent roster with dynamic agents, consensus voting, cost governance, and quality gates, driven by <code>adapters/minimax_m3.sh</code>.</p>
+              <pre style="margin:0"><code>make test   ·   ./skill.sh</code></pre>
+            </div>
+          </div>
+          <p style="margin-top:14px">Set <code>GMI_API_KEY</code> and each skill runs against real M3; without a key both fall back to a deterministic offline mode so they never hard-crash.</p>
+        </section>
+
+        <section id="roster">
+          <h2>Agent roster</h2>
+          <p>M3 assigns the best specialist to each task. The engine ships an 8-persona roster; VORTEX-OS-v3 adds a 30+ agent catalog spanning coding, data, security, ops, QA, research, and writing. Filter below.</p>
+          <input class="searchbox" id="agentSearch" type="search" placeholder="Filter agents… (e.g. security, coder, review)" aria-label="Filter agents" />
+          <p class="muted" id="agentCount" style="font-size:13px; margin:6px 0 12px"></p>
+          <h3>Engine roster · <code>agents/</code></h3>
+          <div class="roster" id="rosterEngine"></div>
+          <h3 style="margin-top:22px">VORTEX-OS-v3 catalog · <code>vortex-os-v3/agents/</code></h3>
+          <div class="roster" id="rosterV3"></div>
+        </section>
+
+        <section id="modules">
+          <h2>Core modules</h2>
+          <p>The platform is organized as a standard Python project under <code>src/</code>.</p>
+          <table class="kv">
+            <tr><th><code>llm/</code></th><td>The single LLM integration point — <code>LLMClient</code> with retry/backoff, token-budget accounting, robust JSON extraction, tool-calling, SSE streaming, and a graceful mock fallback.</td></tr>
+            <tr><th><code>orchestrator/</code></th><td>The DAG orchestrator, task decomposer, specialist roster assignment, prompts, and the HITL gate.</td></tr>
+            <tr><th><code>supervisor_agent/</code></th><td><code>SupervisorCore</code> and the <strong>Expectimax</strong> decision agent (ALLOW / WARN / CORRECT / ESCALATE).</td></tr>
+            <tr><th><code>monitoring/</code></th><td>Monitoring engine, resource monitor, and the <code>QualityAnalyzer</code> heuristics.</td></tr>
+            <tr><th><code>task_coherence/</code></th><td>Drift and coherence checks that keep worker output aligned to the plan.</td></tr>
+            <tr><th><code>researcher/</code></th><td>The proactive research assistant that detects a stuck agent and synthesizes a recovery suggestion.</td></tr>
+            <tr><th><code>reporting/</code></th><td>Dashboards, alerts, and confidence reporting.</td></tr>
+            <tr><th><code>idea_validation/</code></th><td>Idea validation utilities (feasibility, skills, market niche).</td></tr>
+            <tr><th><code>server/</code></th><td>The MCP server (<code>src/server/main.py</code>) that exposes the supervisor as tools.</td></tr>
+            <tr><th><code>error_handling/</code></th><td>Shared error-handling primitives used across the engine.</td></tr>
+          </table>
+        </section>
+
+        <section id="extension">
+          <h2>Browser extension</h2>
+          <p>An <strong>AI Agent Supervisor</strong> browser extension (Manifest V3) monitors and supervises AI agents across web platforms — ChatGPT, Claude, Gemini, and MiniMax — with a popup UI and an activity log.</p>
+          <div class="chips">
+            <span class="chip">chat.openai.com</span>
+            <span class="chip">claude.ai</span>
+            <span class="chip">gemini.google.com</span>
+            <span class="chip">minimax.io</span>
+          </div>
+          <p>Source lives in <code>browser_extension/</code> — <code>popup.html</code>, <code>background.js</code>, <code>content.js</code>, and <code>activity-log.html</code>.</p>
+        </section>
+
+        <section id="integration">
+          <h2>MiniMax-M3 / GMI Cloud integration</h2>
+          <table class="kv">
+            <tr><th>Endpoint</th><td><code>https://api.gmi-serving.com/v1/messages</code> (Anthropic Messages-compatible)</td></tr>
+            <tr><th>Base URL</th><td><code>https://api.gmi-serving.com/v1</code> (env <code>GMI_BASE_URL</code>)</td></tr>
+            <tr><th>Model</th><td><code>MiniMaxAI/MiniMax-M3</code> (env <code>SUPERVISOR_MODEL</code>)</td></tr>
+            <tr><th>Auth</th><td><code>x-api-key: $GMI_API_KEY</code> and <code>Authorization: Bearer $GMI_API_KEY</code> (both sent)</td></tr>
+          </table>
+          <p><code>LLMClient</code> adds production concerns on top of the raw endpoint: retry with exponential backoff (on 429/5xx/network), token-budget accounting, robust structured-JSON extraction, tool-calling pass-through, SSE streaming, and a graceful mock fallback so the demo, tests, and MCP server never hard-crash when no key is set.</p>
+          <div class="callout warn"><strong>Security:</strong> never commit your <code>GMI_API_KEY</code>. It belongs in <code>.env</code> (gitignored) only. Rotate any key shared in plaintext.</div>
+        </section>
+
+        <section id="quickstart">
+          <h2>Quickstart</h2>
+          <pre><code># 1. Install
+pip install -r requirements.txt
+
+# 2. Configure your GMI key
+cp .env.example .env      # then paste your GMI_API_KEY
+#   (or:  export GMI_API_KEY="&lt;your key&gt;")
+
+# 3. Run the turnkey demo — plan, delegate, audit, self-correct, verify
+python demo.py
+
+# 4. Run the test suite
+PYTHONPATH=src pytest tests/ -q
+
+# 5. (optional) Run the MCP server exposing the supervisor as tools
+PYTHONPATH=src python src/server/main.py</code></pre>
+          <p>With no <code>GMI_API_KEY</code> the demo still runs end-to-end on a deterministic mock, so you can see the loop before wiring a key.</p>
+        </section>
+
+        <section id="roadmap">
+          <h2>Roadmap</h2>
+          <div class="grid grid-2">
+            <div class="card"><strong>Interactive goal definition</strong><p style="margin:6px 0 0">Drag-and-drop task planning in the dashboard.</p></div>
+            <div class="card"><strong>The Ethics Guardian</strong><p style="margin:6px 0 0">A specialized supervisor that enforces an “ethical constitution.”</p></div>
+            <div class="card"><strong>Self-improving supervisor</strong><p style="margin:6px 0 0">Meta-learning from its own interventions to improve its policies.</p></div>
+            <div class="card"><strong>Predictive intervention</strong><p style="margin:6px 0 0">Analyze work in real time to predict and prevent failures before they land.</p></div>
+            <div class="card"><strong>Decentralized swarm</strong><p style="margin:6px 0 0">Move from a single orchestrator to a decentralized swarm.</p></div>
+            <div class="card"><strong>Human-AI symbiosis</strong><p style="margin:6px 0 0">Conversational planning and deeply explainable AI (XAI).</p></div>
+          </div>
+        </section>
+
+        <section id="glossary">
+          <h2>Glossary</h2>
+          <table class="kv">
+            <tr><th>Task DAG</th><td>A directed acyclic graph of tasks with explicit dependencies, produced by the planner.</td></tr>
+            <tr><th>Drift</th><td>When a worker’s output diverges from the plan — off-task work, empty stubs, or unrelated changes. Caught by the coherence check.</td></tr>
+            <tr><th>Audit verdict</th><td>The supervisor’s pass/fail judgment of an output against the plan, with a confidence score.</td></tr>
+            <tr><th>Self-heal</th><td>A re-prompt of a failed/drifted task with a concrete correction hint, followed by a re-audit.</td></tr>
+            <tr><th>HITL / Deep-Sleep</th><td>The human-in-the-loop gate that halts <code>high_stakes</code> tasks for explicit approval.</td></tr>
+            <tr><th>Expectimax</th><td>The probabilistic decision algorithm the supervisor uses to choose ALLOW / WARN / CORRECT / ESCALATE.</td></tr>
+            <tr><th>MCP</th><td>Model Context Protocol — the interface the supervisor is exposed through as a set of tools.</td></tr>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="wrap" style="display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:space-between">
+      <div>SupervisorAI Codex · Powered by MiniMax-M3 on GMI Cloud</div>
+      <div style="display:flex; gap:18px; flex-wrap:wrap">
+        <a href="../"><strong>▶ Live Demo</strong></a>
+        <a href="https://github.com/hungryshmorez/Supervisorai" target="_blank" rel="noopener">GitHub</a>
+        <a href="#overview">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/theme.js"></script>
+  <script>
+    var ENGINE = [
+      ["analyst.strategic","Strategic analysis & planning"],
+      ["coder.javascript","JavaScript implementation"],
+      ["coder.python","Python implementation"],
+      ["coder.typescript","TypeScript implementation"],
+      ["researcher.web","Web research & analysis"],
+      ["reviewer.code","Code review & coverage"],
+      ["writer.docs","Documentation writing"],
+      ["writer.narrative","Narrative & prose writing"]
+    ];
+    var V3 = [
+      ["coder.python","Python"],["coder.rust","Rust"],["coder.typescript","TypeScript"],
+      ["coder.sql_migrations","SQL migrations"],["coder.terraform","Terraform / IaC"],
+      ["data.cleaner","Data cleaning"],["data.lineage","Data lineage"],["data.profiler","Data profiling"],
+      ["data.synthesizer","Synthetic data"],["reviewer.code","Code review"],["reviewer.architecture","Architecture review"],
+      ["reviewer.dependencies","Dependency review"],["security.sast","Static analysis (SAST)"],
+      ["security.deps","Dependency security"],["security.secrets","Secret scanning"],["security.threatmodel","Threat modeling"],
+      ["qa.flakehunter","Flaky-test hunting"],["tester.mutation","Mutation testing"],
+      ["ops.deploy.k8s","Kubernetes deploy"],["ops.deploy.serverless","Serverless deploy"],
+      ["ops.cost_optimizer","Cost optimization"],["ops.incident_responder","Incident response"],
+      ["researcher.web","Web research"],["researcher.academic","Academic research"],["researcher.codebase","Codebase research"],
+      ["pm.prioritizer","Prioritization"],["support.triager","Support triage"],
+      ["writer.docs","Docs"],["writer.commit","Commit messages"],["writer.slack_digest","Slack digests"]
+    ];
+    function render(list, el){
+      el.innerHTML = "";
+      list.forEach(function(a){
+        var d = document.createElement("div");
+        d.className = "agent";
+        d.innerHTML = "<div class='id'>" + a[0] + "</div><div class='role'>" + a[1] + "</div>";
+        d.dataset.text = (a[0] + " " + a[1]).toLowerCase();
+        el.appendChild(d);
+      });
+    }
+    render(ENGINE, document.getElementById("rosterEngine"));
+    render(V3, document.getElementById("rosterV3"));
+    var totalAgents = ENGINE.length + V3.length;
+    var countEl = document.getElementById("agentCount");
+    function updateCount(shown){ countEl.textContent = shown + " of " + totalAgents + " agents shown"; }
+    updateCount(totalAgents);
+    document.getElementById("agentSearch").addEventListener("input", function(e){
+      var q = e.target.value.trim().toLowerCase();
+      var shown = 0;
+      document.querySelectorAll(".agent").forEach(function(a){
+        var match = !q || a.dataset.text.indexOf(q) !== -1;
+        a.hidden = !match; if (match) shown++;
+      });
+      updateCount(shown);
+    });
+
+    // Scrollspy for the TOC
+    var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+    var sections = links.map(function(l){ return document.querySelector(l.getAttribute("href")); });
+    function onScroll(){
+      var y = window.scrollY + 100, idx = 0;
+      sections.forEach(function(s, i){ if (s && s.offsetTop <= y) idx = i; });
+      links.forEach(function(l, i){ l.classList.toggle("active", i === idx); });
+    }
+    window.addEventListener("scroll", onScroll, { passive:true });
+    onScroll();
+  </script>
+</body>
+</html>
